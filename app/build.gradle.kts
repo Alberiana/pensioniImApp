@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.pensioniim"
-    compileSdk = 33
+    compileSdk = 34 // Update compileSdkVersion to 34
 
     defaultConfig {
         applicationId = "com.example.pensioniim"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34 // Update targetSdkVersion to 34
         versionCode = 1
         versionName = "1.0"
 
@@ -50,7 +50,6 @@ android {
 }
 
 dependencies {
-
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -66,14 +65,20 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    // FaceLivenessDetector dependency
-    implementation("com.amplifyframework.ui:liveness:1.2.1")
-    // Amplify Auth dependency
-    implementation("com.amplifyframework:aws-auth-cognito:2.14.5")
-    // Material3 dependency for theming FaceLivenessDetector
-    implementation("androidx.compose.material3:material3:1.1.2")
+    // Amplify core dependency
+    implementation ("com.amplifyframework:core:2.14.11")
     // Support for Java 8 features
-    implementation("com.android.tools:desugar_jdk_libs:1.1.5")
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:1.1.5")
+
+    // FaceLivenessDetector dependency
+    implementation ("com.amplifyframework.ui:liveness:1.2.1")
+
+    // Amplify Auth dependency (unnecessary if using your own credentials provider)
+    implementation ("com.amplifyframework:aws-auth-cognito:2.14.5")
+
+    // Material3 dependency for theming FaceLivenessDetector
+    implementation ("androidx.compose.material3:material3:1.1.2")
+    implementation ("androidx.navigation:navigation-compose:2.4.0-alpha10")
 
 
 }

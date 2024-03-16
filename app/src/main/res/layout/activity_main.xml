@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/idCardNr"
+        android:layout_width="324dp"
+        android:layout_height="73dp"
+        android:layout_marginLeft="45dp"
+        android:layout_marginTop="250dp"
+        android:text="Shenoni ketu numrin e leternjoftimit!!"/>
+
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="371dp"
+        android:layout_height="wrap_content"
+        android:text="Vazhdo"
+        android:layout_marginLeft="20dp"
+        />
+</LinearLayout>
