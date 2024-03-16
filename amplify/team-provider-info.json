@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-dev-04426-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-dev-04426-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-dev-04426-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-pensioniim-dev-04426-deployment",
+      "UnauthRoleName": "amplify-pensioniim-dev-04426-unauthRole",
+      "StackName": "amplify-pensioniim-dev-04426",
+      "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-dev-04426/f6196aa0-e325-11ee-af89-0a9af1c4306d",
+      "AmplifyAppId": "d3hbhlewn5jghm"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      }
+    }
+  }
+}
