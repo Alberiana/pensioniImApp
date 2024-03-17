@@ -79,6 +79,7 @@ dependencies {
     // Material3 dependency for theming FaceLivenessDetector
     implementation ("androidx.compose.material3:material3:1.1.2")
     implementation ("androidx.navigation:navigation-compose:2.4.0-alpha10")
-
+    implementation("com.amplifyframework:core-kotlin:1.0.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
 }
