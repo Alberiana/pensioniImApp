@@ -53,7 +53,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.2.0"
     }
     packaging {
         resources {
@@ -73,6 +73,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.camera:camera-camera2:1.3.2")
+    implementation("androidx.camera:camera-lifecycle:1.3.2")
+    implementation("androidx.room:room-compiler:2.6.1")
+    implementation("com.google.android.gms:play-services-fitness:21.1.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -82,7 +86,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("com.amplifyframework:core:2.14.10")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
-    implementation("com.amplifyframework.ui:liveness:1.0.3")
+    implementation("com.amplifyframework.ui:liveness:1.2.1")
     implementation("com.amplifyframework:aws-auth-cognito:2.14.5")
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
@@ -92,6 +96,9 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-permissions:0.28.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation ("androidx.appcompat:appcompat:1.6.1")
-
+    implementation("org.tensorflow:tensorflow-lite-api:2.7.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.1.0")
+    implementation ("org.tensorflow:tensorflow-lite-support-api:0.1.0")
+    implementation ("com.amplifyframework:aws-predictions:2.14.10")
     // Add any other dependencies you have here
 }

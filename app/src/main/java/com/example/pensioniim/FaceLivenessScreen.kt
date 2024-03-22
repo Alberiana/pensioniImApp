@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,8 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
 import com.amplifyframework.ui.liveness.ui.LivenessColorScheme
-import com.amplifyframework.ui.liveness.util.hasCameraPermission
 import com.example.pensioniim.ui.theme.PensioniImTheme
+import com.example.pensioniim.uiApp.FaceLivenessDetector
 import com.example.pensioniim.util.hasCameraPermission
 
 class FaceLivenessScreen:AppCompatActivity() {
@@ -41,7 +39,7 @@ class FaceLivenessScreen:AppCompatActivity() {
                 ) {
                     FaceLivenessContent()
                     FaceLivenessDetector(
-                        sessionId = <session ID>,
+                        sessionId = < session ID>,
                         region = <region>,
                     onComplete = {
                         Log.i("MyApp", "Face Liveness flow is complete")

@@ -1,4 +1,4 @@
-package com.example.pensioniim
+package com.example.pensioniim.uiApp
 
 
 import android.graphics.RectF
@@ -42,14 +42,8 @@ import com.amplifyframework.auth.AWSCredentialsProvider
 import com.amplifyframework.core.Action
 import com.amplifyframework.core.Consumer
 import com.amplifyframework.ui.liveness.R
-//import com.amplifyframework.ui.liveness.camera.LivenessCoordinator
-//import com.amplifyframework.ui.liveness.camera.OnChallengeComplete
-//import com.amplifyframework.ui.liveness.ml.FaceDetector
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
-//import com.amplifyframework.ui.liveness.model.LivenessCheckState
-//import com.amplifyframework.ui.liveness.ui.helper.VideoViewportSize
-//import com.amplifyframework.ui.liveness.util.hasCameraPermission
-///import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 import com.amplifyframework.ui.liveness.camera.LivenessCoordinator
 import com.amplifyframework.ui.liveness.camera.OnChallengeComplete
 import com.amplifyframework.ui.liveness.ml.FaceDetector
