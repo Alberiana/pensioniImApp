@@ -66,11 +66,10 @@ internal data class LivenessState(
     @VisibleForTesting
     var readyToSendFinalEvents = false
 
-    @OptIn(InternalAmplifyApi::class)
     var livenessSessionInfo: FaceLivenessSession? = null
-    @OptIn(InternalAmplifyApi::class)
+
     var faceTargetChallenge: FaceTargetChallenge? by mutableStateOf(null)
-    @OptIn(InternalAmplifyApi::class)
+
     var colorChallenge: ColorChallenge? = null
 
     fun updateVideoViewportSize(newVideoViewportSize: VideoViewportSize) {

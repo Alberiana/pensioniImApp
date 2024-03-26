@@ -1,3 +1,5 @@
+@file:OptIn(InternalAmplifyApi::class)
+
 package com.example.pensioniim.camera
 
 
@@ -14,6 +16,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.amplifyframework.annotations.InternalAmplifyApi
 import com.amplifyframework.auth.AWSCredentials
 import com.amplifyframework.auth.AWSCredentialsProvider
 import com.amplifyframework.core.BuildConfig
@@ -28,7 +31,7 @@ import com.amplifyframework.predictions.aws.options.AWSFaceLivenessSessionOption
 import com.amplifyframework.predictions.models.FaceLivenessSessionInformation
 import com.amplifyframework.predictions.models.VideoEvent
 //import com.amplifyframework.ui.liveness.BuildConfig
-import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
+import com.example.pensioniim.model.FaceLivenessDetectionException
 import com.example.pensioniim.model.LivenessCheckState
 import com.example.pensioniim.state.LivenessState
 import com.example.pensioniim.util.WebSocketCloseCode
@@ -43,11 +46,11 @@ import kotlinx.coroutines.launch
 
 internal typealias OnMuxedSegment = (bytes: ByteArray, timestamp: Long) -> Unit
 internal typealias OnChallengeComplete = () -> Unit
-internal typealias OnFreshnessColorDisplayed = (
-    currentColor: RgbColor,
-    previousColor: RgbColor,
-    sequenceNumber: Int,
-    colorStartTime: Long
+internal typealias OnFreshnessColorDisplayed=(
+        currentColor: RgbColor,
+        previousColor: RgbColor,
+        sequenceNumber: Int,
+        colorStartTime: Long
 ) -> Unit
 
 @SuppressLint("UnsafeOptInUsageError")
