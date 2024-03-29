@@ -3,6 +3,7 @@
 package com.example.pensioniim.camera
 
 
+//import com.amplifyframework.ui.liveness.BuildConfig
 import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.camera2.CaptureRequest
@@ -30,19 +31,18 @@ import com.amplifyframework.predictions.aws.models.RgbColor
 import com.amplifyframework.predictions.aws.options.AWSFaceLivenessSessionOptions
 import com.amplifyframework.predictions.models.FaceLivenessSessionInformation
 import com.amplifyframework.predictions.models.VideoEvent
-//import com.amplifyframework.ui.liveness.BuildConfig
 import com.example.pensioniim.model.FaceLivenessDetectionException
 import com.example.pensioniim.model.LivenessCheckState
 import com.example.pensioniim.state.LivenessState
 import com.example.pensioniim.util.WebSocketCloseCode
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.Timer
 import java.util.concurrent.Executors
 import kotlin.concurrent.schedule
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 
 internal typealias OnMuxedSegment = (bytes: ByteArray, timestamp: Long) -> Unit
 internal typealias OnChallengeComplete = () -> Unit
@@ -102,6 +102,7 @@ internal class LivenessCoordinator(
         setAnalyzer(analysisExecutor, analyzer)
     }
 
+    @OptIn(InternalAmplifyApi::class)
     private val encoder = LivenessVideoEncoder.create(
         context = context,
         width = TARGET_WIDTH,

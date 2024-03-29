@@ -32,39 +32,24 @@ class FaceLivenessScreen:AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PensioniImTheme {
-                Surface(
-                    colorScheme = LivenessColorScheme.default()
-
-                ) {
-                    FaceLivenessContent()
+            PensioniImTheme (
+                    colorScheme = LivenessColorScheme.default()){
                     FaceLivenessDetector(
-                        sessionId = < session ID>,
-                        region = <region>,
-                    onComplete = {
-                        Log.i("MyApp", "Face Liveness flow is complete")
-                        // The Face Liveness flow is complete and the session
-                        // results are ready. Use your backend to retrieve the
-                        // results for the Face Liveness session.
-                    },
-                    onError = { error ->
-                        Log.e("MyApp", "Error during Face Liveness flow", error)
-                        // An error occurred during the Face Liveness flow, such as
-                        // time out or missing the required permissions.
-                    }
-                    )
-                    val key = Triple(sessionId, region, credentialsProvider)
-                    var isFinished by remember(key) { mutableStateOf(false) }
-                    val currentOnError by rememberUpdatedState(onError)
-
-                    if (!LocalContext.current.hasCameraPermission()) {
-                        LaunchedEffect(key) {
-                            isFinished = true
-                            currentOnError.accept(FaceLivenessDetectionException.CameraPermissionDeniedException())
+                        sessionId = sessionId,
+                        region = "us-east-1",
+                        disableStartView = false,
+                        onComplete = {
+                            viewModel.fetchSessionResult(sessionId)
+                            onChallengeComplete()
+                        },
+                        onError = {
+                            if (it is FaceLivenessDetectionException.UserCancelledException) {
+                                onBack()
+                            } else {
+                                viewModel.reportErrorResult(it)
+                                onChallengeComplete()
+                            }
                         }
-                        return
-                    }
-                }
             }
         }
     }

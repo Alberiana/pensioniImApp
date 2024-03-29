@@ -37,19 +37,21 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.amplifyframework.annotations.InternalAmplifyApi
 import com.amplifyframework.auth.AWSCredentials
 import com.amplifyframework.auth.AWSCredentialsProvider
 import com.amplifyframework.core.Action
 import com.amplifyframework.core.Consumer
 import com.amplifyframework.ui.liveness.R
-import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
+import com.example.pensioniim.model.FaceLivenessDetectionException
 import kotlinx.coroutines.launch
-import com.amplifyframework.ui.liveness.camera.LivenessCoordinator
-import com.amplifyframework.ui.liveness.camera.OnChallengeComplete
-import com.amplifyframework.ui.liveness.ml.FaceDetector
-import com.amplifyframework.ui.liveness.model.LivenessCheckState
-import com.amplifyframework.ui.liveness.ui.helper.VideoViewportSize
-import com.amplifyframework.ui.liveness.util.hasCameraPermission
+import com.example.pensioniim.camera.LivenessCoordinator
+import com.example.pensioniim.camera.OnChallengeComplete
+import com.example.pensioniim.ml.FaceDetector
+import com.example.pensioniim.model.LivenessCheckState
+import com.example.pensioniim.uiApp.helper.InstructionMessage
+import com.example.pensioniim.uiApp.helper.VideoViewportSize
+import com.example.pensioniim.util.hasCameraPermission
 
 
 /**
@@ -131,6 +133,7 @@ fun FaceLivenessDetector(
     }
 }
 
+@OptIn(InternalAmplifyApi::class)
 @Composable
 internal fun ChallengeView(
     key: Any,
