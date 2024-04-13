@@ -1,17 +1,8 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://packages.amplify.aws/sdk/android") }
-    }
-}
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-   // id("amplify.android.ui.component")
-    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("plugin.serialization") version "1.6.10"
 
-   // id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -20,11 +11,12 @@ android {
 
     defaultConfig {
         applicationId = "com.example.pensioniim"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 34 // Update targetSdkVersion to 34
         versionCode = 1
         versionName = "1.0"
         buildConfigField("boolean", "SHOW_DEBUG_UI", "false")
+        multiDexEnabled=true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,13 +39,14 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0"
+        kotlinCompilerExtensionVersion = "1.4.2"
     }
     packaging {
         resources {
@@ -62,6 +55,14 @@ android {
 
         }
     }
+    configurations.all {
+        resolutionStrategy {
+            force ("com.intellij:annotations:12.0")
+            force ("org.jetbrains:annotations:23.0.0")
+            force ("org.tensorflow:tensorflow-lite:2.7.0")
+        }
+    }
+
 }
 
 dependencies {
@@ -75,7 +76,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.camera:camera-camera2:1.3.2")
     implementation("androidx.camera:camera-lifecycle:1.3.2")
-    implementation("androidx.room:room-compiler:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -83,25 +84,37 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation("com.amplifyframework:core:2.14.10")
+    implementation("com.amplifyframework:core:2.14.11")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
-    implementation("com.amplifyframework.ui:liveness:1.2.1")
+
+
     implementation("com.amplifyframework:aws-auth-cognito:2.14.5")
-    implementation("androidx.compose.material3:material3:1.1.2")
+    //implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
     implementation("com.amplifyframework:core-kotlin:2.14.11")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation ("com.google.accompanist:accompanist-permissions:0.28.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-    implementation ("androidx.appcompat:appcompat:1.6.1")
-    implementation("org.tensorflow:tensorflow-lite-api:2.7.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.1.0")
-    implementation ("org.tensorflow:tensorflow-lite-support-api:0.1.0")
-    implementation ("com.amplifyframework:aws-predictions:2.14.10")
-    implementation("androidx.concurrent:concurrent-futures:1.1.0")
-    implementation ("com.google.guava:listenablefuture:1.0")
-    implementation ("com.google.guava:guava:30.1-jre")
+
+    implementation("com.amplifyframework.ui:liveness:1.2.1") {
+        exclude(group="org.jetbrains", module= "annotations")}
+//    }
+//    implementation("com.intellij:annotations:12.0") {
+//        exclude(group = "org.jetbrains", module = "annotations")
+//    }
+//
+//    implementation("com.intellij:annotations:12.0") {
+//        exclude(group = "org.intellij.lang", module = "annotations.Identifier")
+//        exclude(group = "org.intellij.lang", module = "annotations.JdkConstants")
+//        exclude(group = "org.intellij.lang", module = "annotations.Language")
+//        exclude(group = "org.intellij.lang", module = "annotations.MagicConstant")
+//        exclude(group = "org.intellij.lang", module = "annotations.Pattern")
+//        exclude(group = "org.intellij.lang", module = "annotations.PrintFormat")
+//    }
+
+
+//
+//    implementation("org.tensorflow:tensorflow-lite-api:2.13.0") {
+//        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+//    }
+    implementation ("com.android.support:multidex:2.0.1")
 
     // Add any other dependencies you have here
 }

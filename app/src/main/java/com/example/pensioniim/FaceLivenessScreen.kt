@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
+import com.amplifyframework.ui.liveness.ui.FaceLivenessDetector
 import com.amplifyframework.ui.liveness.ui.LivenessColorScheme
 
 @Composable
@@ -20,7 +21,7 @@ fun FaceLivenessScreen(
     val sessionId = viewModel.sessionId.collectAsState().value ?: return
 
     MaterialTheme(colorScheme = LivenessColorScheme.default()) {
-        com.amplifyframework.ui.liveness.ui.FaceLivenessDetector(
+        FaceLivenessDetector(
             sessionId = sessionId,
             region = "us-east-1",
             disableStartView = false,

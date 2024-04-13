@@ -4,21 +4,6 @@
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-sdk
-        android:minSdkVersion="23"
-        tools:overrideLibrary="
-            com.amplifyframework.api.aws,
-            com.amplifyframework.annotations,
-            com.amplifyframework.appsync,
-            com.amplifyframework.auth.cognito,
-            com.amplifyframework.aws.core,
-            com.amplifyframework.common.core
-            com.amplifyframework.core,
-            com.amplifyframework.kotlin,
-            com.amplifyframework.plugins.core,
-            com.amplifyframework.predictions.aws,
-            com.amplifyframework.ui.liveness" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -38,8 +23,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".FaceLivenessScreen" />
-
     </application>
 
 </manifest>
