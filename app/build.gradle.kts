@@ -92,7 +92,7 @@ dependencies {
     //implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
     implementation("com.amplifyframework:core-kotlin:2.14.11")
-
+    implementation ("com.amplifyframework:aws-api:2.14.9")
     implementation("com.amplifyframework.ui:liveness:1.2.1") {
         exclude(group="org.jetbrains", module= "annotations")}
 //    }
@@ -114,7 +114,7 @@ dependencies {
 //    implementation("org.tensorflow:tensorflow-lite-api:2.13.0") {
 //        exclude(group = "org.tensorflow", module = "tensorflow-lite")
 //    }
-    implementation ("com.android.support:multidex:2.0.1")
+   // implementation ("com.android.support:multidex:2.0.1")
 
     // Add any other dependencies you have here
 }

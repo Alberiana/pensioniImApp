@@ -1,6 +1,7 @@
 package com.example.pensioniim
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,11 @@ class MainActivity : ComponentActivity() {
                 composable("main") {
                     MainActivityContent(navController)
                 }
+                composable("faceLivenessScreen") {
+                    FaceLivenessScreenContent(navController)
+                }
             }
+
         }
     }
 
@@ -42,12 +47,21 @@ class MainActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Welcome to Your App!")
+            Log.d("WELCOMEEEE", "Welcome to Your App ")
+
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
-                navController.navigate("faceLivenessScreen")
+                try {
+                    Log.d("BEFORECLICK", "BEFORECLICK")
+                    navController.navigate("faceLivenessScreen")
+                } catch (e: Exception) {
+                    Log.e("NavigationError", "Error navigating to faceLivenessScreen: ${e.message}")
+                }
             }) {
+                Log.d("FaceLivenessButtonnn", "Buttonnn FaceLivenessDetector ")
                 Text("Start Face Liveness Detection")
             }
+
         }
     }
 

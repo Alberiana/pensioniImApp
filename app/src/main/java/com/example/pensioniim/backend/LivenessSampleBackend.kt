@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 object LivenessSampleBackend {
+    private val logger = Amplify.Logging.forNamespace("LivenessSampleBackend")
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -14,16 +15,21 @@ object LivenessSampleBackend {
         val request = RestOptions.builder()
             .addPath("/liveness/create")
             .build()
+        logger.verbose("Creating session...")
 
-        return Amplify.API.post(request).data.asJSONObject()["sessionId"] as String
+        val response = Amplify.API.post(request)
+        logger.verbose("Session created. Response: $response")
+        return response.data.asJSONObject()["sessionId"] as String
     }
 
     suspend fun getLivenessSessionResults(sessionId: String): LivenessSessionResult {
         val request = RestOptions.builder()
             .addPath("/liveness/$sessionId")
             .build()
+        logger.verbose("Getting session results for session ID: $sessionId")
 
         val result = Amplify.API.get(request)
+        logger.verbose("Session results received. Response: $result")
         return json.decodeFromString(result.data.asString())
     }
 }
