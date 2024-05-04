@@ -50,7 +50,9 @@ class MainActivity : ComponentActivity() {
             Log.d("WELCOMEEEE", "Welcome to Your App ")
 
             Spacer(modifier = Modifier.height(16.dp))
+
             Button(onClick = {
+                Log.d("ButtonClicked", "Button clicked!")
                 try {
                     Log.d("BEFORECLICK", "BEFORECLICK")
                     navController.navigate("faceLivenessScreen")

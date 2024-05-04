@@ -94,8 +94,17 @@ dependencies {
     implementation("com.amplifyframework:core-kotlin:2.14.11")
     implementation ("com.amplifyframework:aws-api:2.14.9")
     implementation("com.amplifyframework.ui:liveness:1.2.1") {
-        exclude(group="org.jetbrains", module= "annotations")}
+        exclude(group="org.jetbrains", module= "annotations")
+    }
 //    }
+
+    implementation ("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation ("com.amazonaws:aws-android-sdk-core:2.3.2")
+    implementation("com.amazonaws:aws-android-sdk-s3:2.3.2")
+    implementation("com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.3.2")
+    implementation("com.amazonaws:aws-android-sdk-cognito:2.3.2")
+    implementation("com.amazonaws:aws-android-sdk-apigateway-core:2.3.2")
+
 //    implementation("com.intellij:annotations:12.0") {
 //        exclude(group = "org.jetbrains", module = "annotations")
 //    }

@@ -1,4 +1,28 @@
 {
+  "api": {
+    "api": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "createSessionId"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "liveness"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "auth": {
     "pensioniima482fa16a482fa16": {
       "customAuth": false,
@@ -23,6 +47,37 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "createSessionId": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "liveness": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_liveness_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "liveness"
+        }
+      ]
+    },
+    "AMPLIFY_function_liveness_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "liveness"
+        }
+      ]
     }
   }
 }

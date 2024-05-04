@@ -9,11 +9,22 @@
       "UnauthRoleName": "amplify-pensioniim-dev-04426-unauthRole",
       "StackName": "amplify-pensioniim-dev-04426",
       "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-dev-04426/f6196aa0-e325-11ee-af89-0a9af1c4306d",
-      "AmplifyAppId": "d3hbhlewn5jghm"
+      "AmplifyAppId": "d3hbhlewn5jghm",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-pensioniim-dev-04426-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
         "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "liveness": {
+          "deploymentBucketName": "amplify-pensioniim-dev-04426-deployment",
+          "s3Key": "amplify-builds/liveness-47794c5a58715245394c-build.zip"
+        },
+        "createSessionId": {}
+      },
+      "api": {
+        "api": {}
       }
     }
   }

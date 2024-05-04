@@ -5,6 +5,9 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amplifyframework.auth.AuthException
@@ -12,6 +15,7 @@ import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInExcepti
 import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
 import com.example.pensioniim.backend.LivenessSampleBackend
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -21,11 +25,11 @@ class MainViewModel : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Fetching)
     val authState = _authState.asStateFlow()
 
-    private val _fetchingSession = MutableStateFlow(false)
-    val fetchingSession = _fetchingSession.asStateFlow()
+    private val _fetchingSession = MutableLiveData<Boolean>()
+    val fetchingSession: LiveData<Boolean> get() = _fetchingSession
 
-    private val _sessionId = MutableStateFlow<String?>(null)
-    val sessionId = _sessionId.asStateFlow()
+    private val _sessionId = MutableLiveData<String?>()
+    val sessionId: LiveData<String?> get() = _sessionId
 
     private val _fetchingResult = MutableStateFlow(false)
     val fetchingResult = _fetchingResult.asStateFlow()
@@ -73,18 +77,22 @@ class MainViewModel : ViewModel() {
     }
 
     fun createLivenessSession(onComplete: (sessionId: String?) -> Unit) {
-        _fetchingSession.value = true
-        viewModelScope.launch {
+        _fetchingSession.postValue(true)
+        Log.d("CreateLivenessSession", "Creating session")
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val sessionId = LivenessSampleBackend.createSession()
-                _sessionId.value = sessionId
+                Log.d("CreateLivenessSession", "Response from endpoint: $sessionId")
+
+                _sessionId.postValue(sessionId)
                 onComplete(sessionId)
             } catch (e: Exception) {
-                //Log.e(MainActivity.TAG, "Failed to create Liveness session ID.", e)
-                _sessionId.value = null
+                Log.e("CreateLivenessSession", "Error creating liveness session", e)
+                _sessionId.postValue(null)
                 onComplete(null)
+            } finally {
+                _fetchingSession.postValue(false)
             }
-            _fetchingSession.value = false
         }
     }
 
