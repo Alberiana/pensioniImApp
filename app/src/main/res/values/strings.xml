@@ -17,4 +17,34 @@
     <string name="amplify_ui_liveness_challenge_connecting">Connecting</string>
     <string name="amplify_ui_liveness_challenge_verifying">Verifying</string>
     <string name="amplify_ui_liveness_challenge_a11y_cancel_content_description">Cancel Challenge</string>
+
+    <string name="liveness_check">Liveness check</string>
+    <string name="liveness_result">Liveness result</string>
+    <string name="session_id_label">Session ID:</string>
+    <string name="confidence_score_label">Liveness confidence score:</string>
+    <string name="result_label">Result:</string>
+    <string name="check_successful">Check successful</string>
+    <string name="check_unsuccessful">Check unsuccessful</string>
+    <string name="concatenated_error">Error: %1$s</string>
+    <string name="copied">Copied</string>
+    <string name="copy_session_id">Copy session ID</string>
+    <string name="error">Error</string>
+    <string name="try_again">Try again</string>
+    <string name="reference_image_content_description">Reference image from liveness check</string>
+    <string name="error_camera_permission_denied_title">Camera permission not granted</string>
+    <string name="error_camera_permission_denied_message">Camera permission required to perform check</string>
+    <string name="error_timed_out_title">Time out</string>
+    <string name="error_timed_out_face_fit_message">Face didn\'t fill oval within time limit. Try again and completely fill oval with face in it.</string>
+    <string name="error_timed_out_session_message">Session timed out. Try again.</string>
+    <string name="error_failure_during_countdown_title">"Check failed during countdown"</string>
+    <string name="error_failure_during_countdown_message">Avoid moving closer during countdown and ensure only one face is in front of camera.</string>
+    <string name="error_server_issue_title">Server issue</string>
+    <string name="error_server_issue_message">Cannot complete check due to server issue</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_liveness_session">Create Liveness Session</string>
+    <string name="grant_camera_permission">Grant Camera Permission</string>
+    <string name="open_settings_camera_permissions">Open app settings to grant camera permission.</string>
+    <string name="result_tip_title">Tips to pass the video check:</string>
+    <string name="result_tip_1">Avoid very bright lighting conditions, such as direct sunlight.</string>
+    <string name="result_tip_2">Remove sunglasses, mask, hat, or anything blocking your face.</string>
 </resources>

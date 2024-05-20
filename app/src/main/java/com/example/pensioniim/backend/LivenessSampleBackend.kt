@@ -3,12 +3,10 @@ package com.example.pensioniim.backend
 
 import android.util.Log
 import aws.smithy.kotlin.runtime.io.IOException
-import com.amplifyframework.api.rest.RestOptions
-import com.amplifyframework.kotlin.core.Amplify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -30,12 +28,15 @@ object LivenessSampleBackend {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                val responseBody = response.body?.string()
+                val responseBody = response.body.string()
                 Log.i("response", "This is the response: $responseBody")
 
-                val sessionId = json.parseToJsonElement(
-                    responseBody ?: ""
-                ).jsonObject["sessionId"]?.jsonPrimitive?.content
+                val json = Json { ignoreUnknownKeys = true }  // Create a Json instance with configuration
+                val sessionId = json.parseToJsonElement(responseBody ?: "")
+                    .jsonObject["body"]?.jsonPrimitive?.content?.let {
+                    json.parseToJsonElement(it).jsonObject["sessionId"]?.jsonPrimitive?.content
+                }
+                Log.i("sessionId", "This is sessionId: $sessionId")
 
                 return sessionId ?: ""
             }
@@ -49,32 +50,65 @@ object LivenessSampleBackend {
         }
     }
 
-    fun launchCreateSession(onResult: (String?) -> Unit, onError: (String) -> Unit) {
-        scope.launch {
-            try {
-                val session = createSession()
-                onResult(session)  // Invoke the callback with the session ID
-            } catch (e: IOException) {
-                Log.e("IOException", "Error during network call: ${e.message}", e)
-                onError("Network error: ${e.message}")  // Send error message to the UI
-            } catch (e: Exception) {
-                Log.e("Exception", "Unexpected error: ${e.message}", e)
-                onError("Unexpected error occurred")  // Send a generic error message
-            }
-        }
-    }
+
 
     suspend fun getLivenessSessionResults(sessionId: String): LivenessSessionResult {
-        val request = RestOptions.builder()
-            .addPath("/liveness/$sessionId")
+        Log.i("GET RESULTTT", "Fetching result for session ID: $sessionId")
+
+        val client = OkHttpClient()
+        val url = "https://uagj9wix4f.execute-api.eu-central-1.amazonaws.com/deployment/getResults/$sessionId"
+        Log.i("GET RESULTTT", "Request URL: $url")
+
+        val request = Request.Builder()
+            .url(url)
             .build()
-        val result = Amplify.API.get(request)
-        return json.decodeFromString(result.data.asString())
+
+        return withContext(Dispatchers.IO) {
+            try {
+                client.newCall(request).execute().use { response ->
+                    val responseData = response.body?.string()
+                    Log.i("GET RESULTTT", "Response code: ${response.code}")
+                    Log.i("GET RESULTTT", "Response data: $responseData")
+
+                    if (!response.isSuccessful) {
+                        throw IOException("Unexpected code $response")
+                    }
+
+                    if (responseData.isNullOrEmpty()) {
+                        throw IOException("Empty response body")
+                    }
+
+                    try {
+                        val jsonElement = Json.parseToJsonElement(responseData).jsonObject
+                        val bodyContent = jsonElement["body"]?.jsonPrimitive?.content
+
+                        if (bodyContent.isNullOrEmpty()) {
+                            throw IOException("Empty body content")
+                        }
+
+                        val json = Json { ignoreUnknownKeys = true }
+                        val result: LivenessSessionResult = json.decodeFromString(bodyContent)
+                        Log.i("GET RESULTTT", "Decoded result: $result")
+                        return@withContext result
+                    } catch (e: Exception) {
+                        Log.e("JSON Decode Error", "Error decoding JSON response: ${e.message}", e)
+                        throw e
+                    }
+                }
+            } catch (e: IOException) {
+                Log.e("IOException", "Error during HTTP call: ${e.message}", e)
+                throw e
+            } catch (e: Exception) {
+                Log.e("Exception", "General error: ${e.message}", e)
+                e.printStackTrace()
+                throw e
+            }
+        }
     }
 }
 @Serializable
 data class LivenessSessionResult(
-    val confidenceScore:Float,
     val isLive: Boolean,
-    val auditImageBytes:String
+    val confidenceScore: Float,
+    val auditImageBytes: String?
 )

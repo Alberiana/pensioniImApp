@@ -6,8 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amplifyframework.auth.AuthException
@@ -25,11 +23,11 @@ class MainViewModel : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Fetching)
     val authState = _authState.asStateFlow()
 
-    private val _fetchingSession = MutableLiveData<Boolean>()
-    val fetchingSession: LiveData<Boolean> get() = _fetchingSession
+    private val _fetchingSession = MutableStateFlow(false)
+    val fetchingSession = _fetchingSession.asStateFlow()
 
-    private val _sessionId = MutableLiveData<String?>()
-    val sessionId: LiveData<String?> get() = _sessionId
+    private val _sessionId = MutableStateFlow<String?>(null)
+    val sessionId = _sessionId.asStateFlow()
 
     private val _fetchingResult = MutableStateFlow(false)
     val fetchingResult = _fetchingResult.asStateFlow()
@@ -77,28 +75,35 @@ class MainViewModel : ViewModel() {
     }
 
     fun createLivenessSession(onComplete: (sessionId: String?) -> Unit) {
-        _fetchingSession.postValue(true)
-        Log.d("CreateLivenessSession", "Creating session")
+        _fetchingSession.value = true // Directly setting the value since we are on the main thread
+        Log.d("CreateLivenessSession", "Creating session: ${_fetchingSession.value}")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val sessionId = LivenessSampleBackend.createSession()
                 Log.d("CreateLivenessSession", "Response from endpoint: $sessionId")
 
-                _sessionId.postValue(sessionId)
+                // Switch back to the Main thread to post value to StateFlow which affects UI
+                _sessionId.value = sessionId // Directly setting the value, must be on the main thread if affecting UI
                 onComplete(sessionId)
             } catch (e: Exception) {
                 Log.e("CreateLivenessSession", "Error creating liveness session", e)
-                _sessionId.postValue(null)
+                _sessionId.value = null
                 onComplete(null)
             } finally {
-                _fetchingSession.postValue(false)
+                // Ensuring that the final state change is also done on the main thread
+                _fetchingSession.value = false
             }
         }
     }
 
-    fun fetchSessionResult(sessionId: String) {
-        if (_resultData.value != null) return //we already have result, likely timeout
 
+    fun fetchSessionResult(sessionId: String) {
+        Log.i("fetchSessionResult methodddd", "fetchSessionResult entry")
+        if (_resultData.value != null) {
+            Log.i("fetchSessionResult methodddd", "Exiting early, result data already present.")
+            return
+        }
+        Log.i("fetchSessionResult methodddd", "fetchSessionResult")
         _fetchingResult.value = true
         viewModelScope.launch {
             try {
@@ -132,6 +137,7 @@ class MainViewModel : ViewModel() {
             _fetchingResult.value = false
         }
     }
+
 
     fun reportErrorResult(exception: FaceLivenessDetectionException) {
         sessionId.value?.let {
