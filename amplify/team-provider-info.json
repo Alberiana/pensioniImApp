@@ -27,5 +27,124 @@
         "api": {}
       }
     }
+  },
+  "pensioniim": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-pensioniim-cb02a-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-pensioniim-cb02a-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-pensioniim-cb02a-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-pensioniim-pensioniim-cb02a-deployment",
+      "UnauthRoleName": "amplify-pensioniim-pensioniim-cb02a-unauthRole",
+      "StackName": "amplify-pensioniim-pensioniim-cb02a",
+      "StackId": "arn:aws:cloudformation:eu-west-1:637423621386:stack/amplify-pensioniim-pensioniim-cb02a/e8726500-283a-11ef-b13c-02d2f989d67f",
+      "AmplifyAppId": "d303s68yoizj56"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "createSessionId": {
+          "deploymentBucketName": "amplify-pensioniim-pensioniim-cb02a-deployment",
+          "s3Key": "amplify-builds/createSessionId-6d2f335044427432477a-build.zip"
+        },
+        "liveness": {
+          "deploymentBucketName": "amplify-pensioniim-pensioniim-cb02a-deployment",
+          "s3Key": "amplify-builds/liveness-47794c5a58715245394c-build.zip"
+        }
+      },
+      "api": {
+        "api": {}
+      }
+    }
+  },
+  "newdev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-newdev-52d8d-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-newdev-52d8d-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-newdev-52d8d-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-pensioniim-newdev-52d8d-deployment",
+      "UnauthRoleName": "amplify-pensioniim-newdev-52d8d-unauthRole",
+      "StackName": "amplify-pensioniim-newdev-52d8d",
+      "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-newdev-52d8d/207ac2b0-2c1b-11ef-b2d3-02a7dd1b357f",
+      "AmplifyAppId": "d3hbhlewn5jghm"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "createSessionId": {},
+        "liveness": {}
+      }
+    }
+  },
+  "newpension": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-newpension-ca01d-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-newpension-ca01d-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-newpension-ca01d-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-pensioniim-newpension-ca01d-deployment",
+      "UnauthRoleName": "amplify-pensioniim-newpension-ca01d-unauthRole",
+      "StackName": "amplify-pensioniim-newpension-ca01d",
+      "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-newpension-ca01d/e1535a10-2c1b-11ef-a5fa-06765a62bae3",
+      "AmplifyAppId": "d3hbhlewn5jghm"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "createSessionId": {},
+        "liveness": {}
+      }
+    }
+  },
+  "penim": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-penim-05e24-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-penim-05e24-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-penim-05e24-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-pensioniim-penim-05e24-deployment",
+      "UnauthRoleName": "amplify-pensioniim-penim-05e24-unauthRole",
+      "StackName": "amplify-pensioniim-penim-05e24",
+      "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-penim-05e24/7fd57540-2cf5-11ef-b3ce-02ed63cab183",
+      "AmplifyAppId": "d3hbhlewn5jghm"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "createSessionId": {},
+        "liveness": {}
+      }
+    }
+  },
+  "wen": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pensioniim-wen-14fe7-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-wen-14fe7-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423621386:role/amplify-pensioniim-wen-14fe7-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-pensioniim-wen-14fe7-deployment",
+      "UnauthRoleName": "amplify-pensioniim-wen-14fe7-unauthRole",
+      "StackName": "amplify-pensioniim-wen-14fe7",
+      "StackId": "arn:aws:cloudformation:eu-central-1:637423621386:stack/amplify-pensioniim-wen-14fe7/9db08e80-2cf8-11ef-a248-0af1d7aad421",
+      "AmplifyAppId": "d3hbhlewn5jghm"
+    },
+    "categories": {
+      "auth": {
+        "pensioniima482fa16a482fa16": {}
+      },
+      "function": {
+        "createSessionId": {},
+        "liveness": {}
+      }
+    }
   }
 }

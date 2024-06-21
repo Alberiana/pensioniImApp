@@ -29,10 +29,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -47,6 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
 import com.example.pensioniim.BuildConfig
 import com.example.pensioniim.MainViewModel
@@ -59,30 +58,13 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun ResultScreen(
-    viewModel: MainViewModel,
-    onBack: () -> Unit
-) {
-    //Log.i("RESULT SCREEN ","Here you are in result screen")
+fun ResultScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
 
-    val fetchingResultState = remember { mutableStateOf<String?>(null) }
+    val fetchingSession by viewModel.fetchingSession.collectAsState()
+    val resultData by viewModel.resultData.collectAsState()
 
-    LaunchedEffect(true) {
-        viewModel.createLivenessSession { fetchingResult ->
-            fetchingResultState.value = fetchingResult
-        }
-    }
-    //Log.i("RESULT SCREEN: fetchingResult ","fetchingResult: ${fetchingResultState.value}")
-    //Log.i("RESULT SCREEN: fetchingResult ","fetchingResulttttttttt")
-
-    val resultData = viewModel.resultData.collectAsState().value ?: return
-    if (resultData == null) {
-        Log.i("RESULT SCREEN", "resultData is null")
-    } else {
-       // Log.i("RESULT SCREEN: resultData", "resultData: $resultData")
-    }
-    fetchingResultState.value?.let{
+    if (fetchingSession) {
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
@@ -90,9 +72,27 @@ fun ResultScreen(
         ) {
             CircularProgressIndicator()
         }
-//        else {
-//        ResultsView(resultData, onTryAgain = onBack)
-//    }
+    } else {
+        Log.d("ResultScreen", "Result data: $resultData")
+        resultData?.let { data ->
+            ResultsView(
+                resultData = data,
+                onTryAgain = {
+                    viewModel.clearSession()
+                    viewModel.createLivenessSession { sessionId ->
+                        sessionId?.let { viewModel.fetchSessionResult(it) }
+                    }
+                }
+            )
+        } ?: run {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("No result data available")
+            }
+        }
     }
 }
 
@@ -103,32 +103,52 @@ private fun ResultsView(resultData: ResultData, onTryAgain: () -> Unit) {
         tryAgainButtonOnClick = onTryAgain,
         error = resultData.error,
         isLive = resultData.isLive,
-        confidenceScore = if (BuildConfig.SHOW_DEBUG_UI) resultData.confidenceScore else { null },
-        referenceImage = if (BuildConfig.SHOW_DEBUG_UI) resultData.referenceImage else { null }
+        confidenceScore = if (BuildConfig.SHOW_DEBUG_UI) resultData.confidenceScore else null,
+        referenceImage = if (BuildConfig.SHOW_DEBUG_UI) resultData.referenceImage else null
     )
 }
 
 @Composable
-private fun ResultsView(sessionId: String,
-                        tryAgainButtonOnClick: () -> Unit,
-                        error: FaceLivenessDetectionException? = null,
-                        isLive: Boolean = false,
-                        confidenceScore: Float? = 0f,
-                        referenceImage: Bitmap? = null) {
+private fun ResultsView(
+    sessionId: String,
+    tryAgainButtonOnClick: () -> Unit,
+    error: FaceLivenessDetectionException? = null,
+    isLive: Boolean = false,
+    confidenceScore: Double? = 0.0,
+    referenceImage: Bitmap? = null,
+    referenceImageUrl: String? = null
+) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .background(MaterialTheme.colorScheme.background)
-        .padding(16.dp)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
     ) {
 
-        Column(modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .weight(1f)
-            .fillMaxWidth()
+        referenceImageUrl?.let { url ->
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp))
+            AsyncImage(
+                model = url,
+                contentDescription = stringResource(id = R.string.reference_image_content_description),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                contentScale = ContentScale.FillHeight
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(1f)
+                .fillMaxWidth()
         ) {
             Text(
                 text = if (error != null) {
@@ -143,15 +163,17 @@ private fun ResultsView(sessionId: String,
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 16.dp)
             ) {
-                Column(modifier = Modifier
-                    .padding(end = 16.dp)
-                    .weight(1f)
+                Column(
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .weight(1f)
                 ) {
                     Text(
                         text = stringResource(id = R.string.session_id_label),
@@ -171,7 +193,6 @@ private fun ResultsView(sessionId: String,
                 IconButton(
                     onClick = {
                         clipboardManager.setText(AnnotatedString(sessionId))
-                        // Show a toast for Android 12 and lower
                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
                             Toast
                                 .makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT)
@@ -192,7 +213,8 @@ private fun ResultsView(sessionId: String,
             if (error != null) {
                 val displayError = getDisplayError(error)
 
-                Row(modifier = Modifier.fillMaxWidth(),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -241,7 +263,7 @@ private fun ResultsView(sessionId: String,
                     }
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    confidenceScore?.let {score ->
+                    confidenceScore?.let { score ->
                         Row {
                             Text(
                                 text = stringResource(id = R.string.confidence_score_label),
@@ -251,7 +273,7 @@ private fun ResultsView(sessionId: String,
                             Spacer(Modifier.width(4.dp))
 
                             Text(
-                                text = formattedConfidenceScore(score),
+                                text = formattedConfidenceScore(score.toFloat()),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (isLive) {
                                     MaterialTheme.colorScheme.onSuccessContainer
@@ -340,7 +362,6 @@ private fun getDisplayError(error: FaceLivenessDetectionException): DisplayError
     }
 }
 
-@Preview
 @Composable
 private fun TipView() {
     Column(
@@ -402,12 +423,12 @@ private fun formattedConfidenceScore(confidenceScore: Float): String {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ResultsViewSuccessPreview() {
-    MaterialTheme{
+    MaterialTheme {
         ResultsView(
             sessionId = UUID.randomUUID().toString(),
             tryAgainButtonOnClick = { },
             isLive = true,
-            confidenceScore = 100f
+            confidenceScore = 100.0
         )
     }
 }
@@ -416,12 +437,12 @@ private fun ResultsViewSuccessPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ResultsViewFailedConfidencePreview() {
-    MaterialTheme{
+    MaterialTheme {
         ResultsView(
             sessionId = UUID.randomUUID().toString(),
             tryAgainButtonOnClick = { },
             isLive = false,
-            confidenceScore = 0f
+            confidenceScore = 0.0
         )
     }
 }
@@ -430,7 +451,7 @@ private fun ResultsViewFailedConfidencePreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ResultsViewErrorPreview() {
-    MaterialTheme{
+    MaterialTheme {
         ResultsView(
             sessionId = UUID.randomUUID().toString(),
             isLive = false,

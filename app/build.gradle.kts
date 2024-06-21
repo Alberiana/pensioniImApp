@@ -72,7 +72,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.6.7")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-   // implementation("androidx.compose.material3:material3")
+    // implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3:1.2.0-alpha10")
 
     implementation ("androidx.camera:camera-camera2:1.3.3") // Update to the latest stable
@@ -93,7 +93,7 @@ dependencies {
 
     implementation("com.amplifyframework:aws-auth-cognito:2.14.5")
     //implementation("androidx.compose.material3:material3:1.1.2")
-  //  implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
+    //  implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
     implementation( "androidx.navigation:navigation-compose:2.4.0-beta01" )// Check for the latest version
 
     implementation("com.amplifyframework:core-kotlin:2.14.11")
@@ -112,7 +112,8 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.2")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.2")
     implementation ("androidx.compose.animation:animation:1.2.1")
-
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.8")
+    implementation ("io.coil-kt:coil-compose:2.0.0")
 //    implementation("com.intellij:annotations:12.0") {
 //        exclude(group = "org.jetbrains", module = "annotations")
 //    }

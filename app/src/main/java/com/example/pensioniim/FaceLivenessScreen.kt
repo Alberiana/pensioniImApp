@@ -47,20 +47,24 @@ fun FaceLivenessScreen(
                     viewModel.fetchSessionResult(sessionId)
                     onChallengeComplete()
                 },
-                onError = {
-                    Log.e("FaceLivenessScreen", "Face liveness detection error: $it")
-                    if (it is FaceLivenessDetectionException.UserCancelledException) {
-                        Log.d("FaceLivenessScreen", "User cancelled face liveness detection")
-                        onBack()
-                    } else {
-                        Log.e("FaceLivenessScreen", "Error during face liveness detection: ${it.message}")
-                        viewModel.reportErrorResult(it)
-                        onChallengeComplete()
+                onError = { exception ->
+                    Log.e("FaceLivenessScreen", "Face liveness detection error: $exception")
+                    when (exception) {
+                        is FaceLivenessDetectionException.AccessDeniedException -> {
+                            Log.e("FaceLivenessScreen", "Access denied: ${exception.message}")
+                        }
+                        is FaceLivenessDetectionException.UserCancelledException -> {
+                            Log.d("FaceLivenessScreen", "User cancelled face liveness detection")
+                            onBack()
+                        }
+                        else -> {
+                            Log.e("FaceLivenessScreen", "Error during face liveness detection: ${exception.message}")
+                        }
                     }
+                    viewModel.reportErrorResult(exception)
+                    onChallengeComplete()
                 }
             )
-            Log.d("FaceLivenessScreen", "FaceLivenessDetector setup complete")
         }
     }
 }
-

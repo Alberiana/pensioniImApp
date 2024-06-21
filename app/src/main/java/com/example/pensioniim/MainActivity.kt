@@ -26,6 +26,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,12 +44,14 @@ class MainActivity : ComponentActivity() {
     private companion object {
         const val CAMERA_PERMISSION_REQUEST_CODE = 101
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            navigateToFaceLiveness = isGranted
-        }
+        cameraPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                navigateToFaceLiveness = isGranted
+            }
         setContent {
             val navController = rememberNavController()
 
@@ -60,12 +64,14 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("ResultScreen") { // Make sure this route is exactly "ResultScreen"
                     val viewModel: MainViewModel = viewModel()
-                    ResultScreen(viewModel = viewModel, onBack = { navController.popBackStack() })                }
+                    ResultScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+                }
             }
 
 
         }
     }
+
 
     @Composable
     fun MainActivityContent(navController: NavHostController) {
@@ -96,18 +102,20 @@ class MainActivity : ComponentActivity() {
 
         }
     }
+
     private fun checkCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
     }
+
     @Composable
     fun FaceLivenessScreenContent(navController: NavHostController) {
         val viewModel: MainViewModel = viewModel()
         FaceLivenessScreen(viewModel = viewModel, onChallengeComplete = {
             navController.navigate("ResultScreen") {
-                popUpTo("challenge") {
+                popUpTo("faceLivenessScreen") {
                     inclusive = true
                 }
             }
@@ -128,6 +136,7 @@ class MainActivity : ComponentActivity() {
             }
         )
     }
+
     @Composable
     fun ResultScreenBody(navController: NavHostController, paddingValues: PaddingValues) {
         Column(
@@ -135,8 +144,6 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          //  Text("Face Liveness Check Complete", style = MaterialTheme3.typography.h5)
-            Spacer(modifier = Modifier.height(20.dp))
             Button(onClick = { navController.navigate("main") }) {
                 Text("Back to Main")
             }
@@ -146,9 +153,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
-
+    @Preview
+    @Composable
+    fun previewMainActivity(){
+        MainActivityContent(navController = NavHostController(LocalContext.current))
+    }
 }
+
+
+
+
+
 
 

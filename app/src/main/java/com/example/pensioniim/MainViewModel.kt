@@ -1,6 +1,5 @@
 package com.example.pensioniim
 
-
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -17,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
 
@@ -41,7 +41,6 @@ class MainViewModel : ViewModel() {
         }
     }
 
-
     private suspend fun fetchAuthState() {
         _authState.value = AuthState.Fetching
         _authState.value = try {
@@ -52,7 +51,7 @@ class MainViewModel : ViewModel() {
                 AuthState.SignedOut
             }
         } catch (error: AuthException) {
-          //  Log.e(MainActivity.TAG, "fetchAuthState failed", error)
+            Log.e("MainViewModel", "fetchAuthState failed", error)
             AuthState.SignedOut
         }
     }
@@ -67,7 +66,7 @@ class MainViewModel : ViewModel() {
                 if (e is SignedInException) {
                     AuthState.SignedIn
                 } else {
-                    //Log.e(MainActivity.TAG, "Failed to sign in", e)
+                    Log.e("MainViewModel", "Failed to sign in", e)
                     AuthState.SignedOut
                 }
             }
@@ -75,56 +74,52 @@ class MainViewModel : ViewModel() {
     }
 
     fun createLivenessSession(onComplete: (sessionId: String?) -> Unit) {
-        _fetchingSession.value = true // Directly setting the value since we are on the main thread
-        Log.d("CreateLivenessSession", "Creating session: ${_fetchingSession.value}")
-        viewModelScope.launch(Dispatchers.IO) {
+        _fetchingSession.value = true
+        Log.d("MainViewModel", "Creating session: ${_fetchingSession.value}")
+        viewModelScope.launch {
             try {
-                val sessionId = LivenessSampleBackend.createSession()
-                Log.d("CreateLivenessSession", "Response from endpoint: $sessionId")
-
-                // Switch back to the Main thread to post value to StateFlow which affects UI
-                _sessionId.value = sessionId // Directly setting the value, must be on the main thread if affecting UI
+                val sessionId = withContext(Dispatchers.IO) { LivenessSampleBackend.createSession() }
+                Log.d("MainViewModel", "Response from endpoint: $sessionId")
+                _sessionId.value = sessionId
                 onComplete(sessionId)
             } catch (e: Exception) {
-                Log.e("CreateLivenessSession", "Error creating liveness session", e)
+                Log.e("MainViewModel", "Error creating liveness session", e)
                 _sessionId.value = null
                 onComplete(null)
             } finally {
-                // Ensuring that the final state change is also done on the main thread
                 _fetchingSession.value = false
             }
         }
     }
 
-
     fun fetchSessionResult(sessionId: String) {
-        Log.i("fetchSessionResult methodddd", "fetchSessionResult entry")
+        Log.i("MainViewModel", "fetchSessionResult entry")
         if (_resultData.value != null) {
-            Log.i("fetchSessionResult methodddd", "Exiting early, result data already present.")
+            Log.i("MainViewModel", "Exiting early, result data already present.")
             return
         }
-        Log.i("fetchSessionResult methodddd", "fetchSessionResult")
+        Log.i("MainViewModel", "Fetching session result")
         _fetchingResult.value = true
         viewModelScope.launch {
             try {
-                val result = LivenessSampleBackend.getLivenessSessionResults(sessionId)
-
-                val imageBytes = Base64.decode(result.auditImageBytes, Base64.DEFAULT)
-                val auditImage = BitmapFactory.decodeByteArray(
-                    imageBytes,
-                    0,
-                    imageBytes.size
-                )
-
-                val resultData = ResultData(
-                    sessionId,
-                    isLive = result.isLive,
-                    confidenceScore = result.confidenceScore,
-                    referenceImage = auditImage,
-                )
-
+                val result = withContext(Dispatchers.IO) { LivenessSampleBackend.getLivenessSessionResults(sessionId) }
+                val auditImageBytes = result.auditImages?.firstOrNull()
+                val auditImage = auditImageBytes?.let { base64String ->
+                    val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                }
+                val resultData = result.isLive?.let {
+                    ResultData(
+                        sessionId,
+                        isLive = it,
+                        confidenceScore = result.confidenceScore,
+                        referenceImage = auditImage,
+                    )
+                }
+                Log.i("MainViewModel", "Result Data: $resultData")
                 _resultData.value = resultData
             } catch (e: Exception) {
+                Log.e("MainViewModel", "Error fetching session result", e)
                 val results = ResultData(
                     sessionId,
                     error = FaceLivenessDetectionException(
@@ -133,8 +128,9 @@ class MainViewModel : ViewModel() {
                     )
                 )
                 _resultData.value = results
+            } finally {
+                _fetchingResult.value = false
             }
-            _fetchingResult.value = false
         }
     }
 
@@ -164,7 +160,8 @@ sealed class AuthState {
 data class ResultData(
     val sessionId: String,
     val isLive: Boolean = false,
-    val confidenceScore: Float = 0f,
+    val confidenceScore: Double? = 0.0,
     val referenceImage: Bitmap? = null,
     val error: FaceLivenessDetectionException? = null,
 )
+

@@ -21,7 +21,7 @@ object LivenessSampleBackend {
     suspend fun createSession(): String {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://uagj9wix4f.execute-api.eu-central-1.amazonaws.com/deployment/createSessionId-dev")
+            .url("https://r4rc89ieh7.execute-api.us-east-1.amazonaws.com/default/createSessionUsEast")
             .build()
 
         try {
@@ -56,7 +56,7 @@ object LivenessSampleBackend {
         Log.i("GET RESULTTT", "Fetching result for session ID: $sessionId")
 
         val client = OkHttpClient()
-        val url = "https://uagj9wix4f.execute-api.eu-central-1.amazonaws.com/deployment/getResults/$sessionId"
+        val url = "https://bl5832ba07.execute-api.us-east-1.amazonaws.com/default/GetFaceLivenessSessionResults/$sessionId"
         Log.i("GET RESULTTT", "Request URL: $url")
 
         val request = Request.Builder()
@@ -79,15 +79,8 @@ object LivenessSampleBackend {
                     }
 
                     try {
-                        val jsonElement = Json.parseToJsonElement(responseData).jsonObject
-                        val bodyContent = jsonElement["body"]?.jsonPrimitive?.content
-
-                        if (bodyContent.isNullOrEmpty()) {
-                            throw IOException("Empty body content")
-                        }
-
                         val json = Json { ignoreUnknownKeys = true }
-                        val result: LivenessSessionResult = json.decodeFromString(bodyContent)
+                        val result: LivenessSessionResult = json.decodeFromString(responseData)
                         Log.i("GET RESULTTT", "Decoded result: $result")
                         return@withContext result
                     } catch (e: Exception) {
@@ -105,10 +98,14 @@ object LivenessSampleBackend {
             }
         }
     }
+
+
+
 }
 @Serializable
 data class LivenessSessionResult(
-    val isLive: Boolean,
-    val confidenceScore: Float,
-    val auditImageBytes: String?
+    val isLive: Boolean?,
+    val confidenceScore: Double?,
+    val referenceImageUrl: String?,
+    val auditImages: List<String>?
 )
