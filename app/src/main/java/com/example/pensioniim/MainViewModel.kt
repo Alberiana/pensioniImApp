@@ -3,7 +3,6 @@ package com.example.pensioniim
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,14 +11,22 @@ import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInExcepti
 import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
 import com.example.pensioniim.backend.LivenessSampleBackend
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainViewModel : ViewModel() {
-
+    private val supervisorJob = SupervisorJob()
+    private val jobMap = mutableMapOf<String, Job>()
     private val _authState = MutableStateFlow<AuthState>(AuthState.Fetching)
     val authState = _authState.asStateFlow()
 
@@ -34,7 +41,6 @@ class MainViewModel : ViewModel() {
 
     private val _resultData = MutableStateFlow<ResultData?>(null)
     val resultData = _resultData.asStateFlow()
-
     init {
         viewModelScope.launch {
             fetchAuthState()
@@ -75,15 +81,15 @@ class MainViewModel : ViewModel() {
 
     fun createLivenessSession(onComplete: (sessionId: String?) -> Unit) {
         _fetchingSession.value = true
-        Log.d("MainViewModel", "Creating session: ${_fetchingSession.value}")
+        Log.d("createLivenessSession", "Creating session: ${_fetchingSession.value}")
         viewModelScope.launch {
             try {
                 val sessionId = withContext(Dispatchers.IO) { LivenessSampleBackend.createSession() }
-                Log.d("MainViewModel", "Response from endpoint: $sessionId")
+                Log.d("createLivenessSession", "Response from endpoint: $sessionId")
                 _sessionId.value = sessionId
                 onComplete(sessionId)
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error creating liveness session", e)
+                Log.e("createLivenessSession", "Error creating liveness session", e)
                 _sessionId.value = null
                 onComplete(null)
             } finally {
@@ -92,36 +98,44 @@ class MainViewModel : ViewModel() {
         }
     }
 
+
+
     fun fetchSessionResult(sessionId: String) {
-        Log.i("MainViewModel", "fetchSessionResult entry")
-        if (_resultData.value != null) {
-            Log.i("MainViewModel", "Exiting early, result data already present.")
-            return
-        }
-        Log.i("MainViewModel", "Fetching session result")
+        if (_resultData.value != null) return // If results already exist, skip fetching
         _fetchingResult.value = true
+
         viewModelScope.launch {
             try {
-                val result = withContext(Dispatchers.IO) { LivenessSampleBackend.getLivenessSessionResults(sessionId) }
-                val auditImageBytes = result.auditImages?.firstOrNull()
-                val auditImage = auditImageBytes?.let { base64String ->
-                    val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val result = withTimeout(10000) { // 10 seconds timeout
+                    LivenessSampleBackend.getLivenessSessionResults(sessionId)
                 }
+
                 val resultData = result.isLive?.let {
                     ResultData(
-                        sessionId,
+                        sessionId = sessionId,
                         isLive = it,
                         confidenceScore = result.confidenceScore,
-                        referenceImage = auditImage,
+                        referenceImage = null,
+                        error = null
                     )
                 }
-                Log.i("MainViewModel", "Result Data: $resultData")
+
+                Log.d("fetchSessionResult", "Result data: $resultData")
+
                 _resultData.value = resultData
+                Log.d("fetchSessionResult", "_resultData.value: ${_resultData.value}")
+
+            } catch (e: TimeoutCancellationException) {
+                Log.e("fetchSessionResult", "Timeout fetching session result for sessionId: $sessionId", e)
+            } catch (e: CancellationException) {
+                Log.w("fetchSessionResult", "Job was cancelled for sessionId: $sessionId", e)
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error fetching session result", e)
+                Log.e("fetchSessionResult", "Error fetching session result for sessionId: $sessionId", e)
                 val results = ResultData(
-                    sessionId,
+                    sessionId = sessionId,
+                    isLive = true,
+                    confidenceScore = null,
+                    referenceImage = null,
                     error = FaceLivenessDetectionException(
                         e.message ?: "Error retrieving liveness results",
                         throwable = e
@@ -129,11 +143,29 @@ class MainViewModel : ViewModel() {
                 )
                 _resultData.value = results
             } finally {
+                Log.i("fetchSessionResult", "Setting fetchingResult to false for sessionId: $sessionId")
                 _fetchingResult.value = false
             }
         }
     }
 
+
+
+    suspend fun downloadImage(imageUrl: String): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL(imageUrl)
+                val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                connection.doInput = true
+                connection.connect()
+                val inputStream = connection.inputStream
+                BitmapFactory.decodeStream(inputStream)
+            } catch (e: Exception) {
+                Log.e("downloadImage", "Error downloading image from URL: $imageUrl", e)
+                null
+            }
+        }
+    }
 
     fun reportErrorResult(exception: FaceLivenessDetectionException) {
         sessionId.value?.let {

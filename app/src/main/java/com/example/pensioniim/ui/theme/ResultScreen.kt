@@ -1,13 +1,7 @@
 package com.example.pensioniim.ui.theme
 
-
-import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,14 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,26 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
-import com.example.pensioniim.BuildConfig
 import com.example.pensioniim.MainViewModel
-import com.example.pensioniim.R
 import com.example.pensioniim.ResultData
 import java.text.NumberFormat
-import java.util.UUID
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
@@ -61,10 +32,13 @@ import kotlin.math.min
 fun ResultScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
 
-    val fetchingSession by viewModel.fetchingSession.collectAsState()
+    val fetchingSession by viewModel.fetchingResult.collectAsState()
     val resultData by viewModel.resultData.collectAsState()
 
+    Log.d("ResultScreen", "Fetching session: $fetchingSession, Result data: $resultData")
+
     if (fetchingSession) {
+        Log.d("ResultScreen", "Displaying loading indicator")
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
@@ -73,18 +47,11 @@ fun ResultScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             CircularProgressIndicator()
         }
     } else {
-        Log.d("ResultScreen", "Result data: $resultData")
         resultData?.let { data ->
-            ResultsView(
-                resultData = data,
-                onTryAgain = {
-                    viewModel.clearSession()
-                    viewModel.createLivenessSession { sessionId ->
-                        sessionId?.let { viewModel.fetchSessionResult(it) }
-                    }
-                }
-            )
+            Log.d("ResultScreen", "Displaying results view with data: $data")
+            ResultsView(resultData = data)
         } ?: run {
+            Log.d("ResultScreen", "No result data available")
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,314 +64,35 @@ fun ResultScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-private fun ResultsView(resultData: ResultData, onTryAgain: () -> Unit) {
-    ResultsView(
-        sessionId = resultData.sessionId,
-        tryAgainButtonOnClick = onTryAgain,
-        error = resultData.error,
-        isLive = resultData.isLive,
-        confidenceScore = if (BuildConfig.SHOW_DEBUG_UI) resultData.confidenceScore else null,
-        referenceImage = if (BuildConfig.SHOW_DEBUG_UI) resultData.referenceImage else null
-    )
-}
-
-@Composable
-private fun ResultsView(
-    sessionId: String,
-    tryAgainButtonOnClick: () -> Unit,
-    error: FaceLivenessDetectionException? = null,
-    isLive: Boolean = false,
-    confidenceScore: Double? = 0.0,
-    referenceImage: Bitmap? = null,
-    referenceImageUrl: String? = null
-) {
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
-    val context = LocalContext.current
-
+private fun ResultsView(resultData: ResultData) {
+    Log.d("ResultsView", "Result data: $resultData")
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "Confidence Score",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleLarge
+        )
 
-        referenceImageUrl?.let { url ->
-            Spacer(modifier = Modifier
-                .fillMaxWidth()
-                .height(16.dp))
-            AsyncImage(
-                model = url,
-                contentDescription = stringResource(id = R.string.reference_image_content_description),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                contentScale = ContentScale.FillHeight
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
+        resultData.confidenceScore?.let { score ->
             Text(
-                text = if (error != null) {
-                    stringResource(id = R.string.liveness_check)
-                } else {
-                    stringResource(id = R.string.liveness_result)
-                },
-                modifier = Modifier.semantics { heading() },
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleLarge,
+                text = formattedConfidenceScore(score.toFloat()),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.session_id_label),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = sessionId,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        clipboardManager.setText(AnnotatedString(sessionId))
-                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                            Toast
-                                .makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_outline_content_copy_24),
-                        contentDescription = stringResource(id = R.string.copy_session_id),
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (error != null) {
-                val displayError = getDisplayError(error)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_error_24),
-                        contentDescription = stringResource(id = R.string.error),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = stringResource(id = R.string.concatenated_error, displayError.title),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    text = displayError.message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            } else {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row {
-                        Text(
-                            text = stringResource(R.string.result_label),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-
-                        Spacer(Modifier.width(4.dp))
-
-                        Text(
-                            text = if (isLive) {
-                                stringResource(id = R.string.check_successful)
-                            } else {
-                                stringResource(id = R.string.check_unsuccessful)
-                            },
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    confidenceScore?.let { score ->
-                        Row {
-                            Text(
-                                text = stringResource(id = R.string.confidence_score_label),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(Modifier.width(4.dp))
-
-                            Text(
-                                text = formattedConfidenceScore(score.toFloat()),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (isLive) {
-                                    MaterialTheme.colorScheme.onSuccessContainer
-                                } else {
-                                    MaterialTheme.colorScheme.onErrorContainer
-                                },
-                                modifier = Modifier
-                                    .background(
-                                        color = if (isLive) {
-                                            MaterialTheme.colorScheme.successContainer
-                                        } else {
-                                            MaterialTheme.colorScheme.errorContainer
-                                        },
-                                        shape = MaterialTheme.shapes.extraLarge
-                                    )
-                                    .padding(start = 16.dp, end = 16.dp)
-                            )
-                        }
-                    }
-                }
-                referenceImage?.let { image ->
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(16.dp))
-                    Image(
-                        bitmap = image.asImageBitmap(),
-                        contentDescription = stringResource(id = R.string.reference_image_content_description),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp),
-                        alignment = Alignment.Center,
-                        contentScale = ContentScale.FillHeight
-                    )
-                }
-            }
-            if (!isLive && error == null) {
-                Spacer(Modifier.height(8.dp))
-                TipView()
-            }
+        } ?: run {
+            Text("Confidence score not available")
         }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = tryAgainButtonOnClick
-        ) {
-            Text(text = stringResource(id = R.string.try_again))
-        }
-    }
-}
-
-private data class DisplayError(val title: String, val message: String)
-
-@Composable
-private fun getDisplayError(error: FaceLivenessDetectionException): DisplayError {
-    return when (error) {
-        is FaceLivenessDetectionException.CameraPermissionDeniedException -> {
-            DisplayError(
-                title = stringResource(id = R.string.error_camera_permission_denied_title),
-                message = stringResource(id = R.string.error_camera_permission_denied_message)
-            )
-        }
-        is FaceLivenessDetectionException.SessionTimedOutException -> {
-            DisplayError(
-                title = stringResource(id = R.string.error_timed_out_title),
-                message = stringResource(id = R.string.error_timed_out_session_message)
-            )
-        }
-        else -> {
-            if (error.message.contains("did not match oval", true)) {
-                DisplayError(
-                    title = stringResource(id = R.string.error_timed_out_title),
-                    message = stringResource(id = R.string.error_timed_out_face_fit_message)
-                )
-            } else if (error.message.contains("failed during countdown", ignoreCase = true)) {
-                DisplayError(
-                    title = stringResource(id = R.string.error_failure_during_countdown_title),
-                    message = stringResource(id = R.string.error_failure_during_countdown_message)
-                )
-            } else {
-                DisplayError(
-                    title = stringResource(id = R.string.error_server_issue_title),
-                    message = stringResource(id = R.string.error_server_issue_message)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TipView() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(16.dp)
-    ) {
-        Text(
-            text = stringResource(id = R.string.result_tip_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Column(Modifier.padding(start = 8.dp)) {
-            Tip(1, stringResource(id = R.string.result_tip_1))
-            Spacer(modifier = Modifier.height(8.dp))
-            Tip(2, stringResource(id = R.string.result_tip_2))
-        }
-    }
-}
-
-@Composable
-private fun Tip(tipNumber: Int, body: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = "$tipNumber.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
     }
 }
 
@@ -417,46 +105,4 @@ private fun formattedConfidenceScore(confidenceScore: Float): String {
         maximumFractionDigits = 4
         minimumFractionDigits = 4
     }.format(truncatedConfidenceScore)
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ResultsViewSuccessPreview() {
-    MaterialTheme {
-        ResultsView(
-            sessionId = UUID.randomUUID().toString(),
-            tryAgainButtonOnClick = { },
-            isLive = true,
-            confidenceScore = 100.0
-        )
-    }
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ResultsViewFailedConfidencePreview() {
-    MaterialTheme {
-        ResultsView(
-            sessionId = UUID.randomUUID().toString(),
-            tryAgainButtonOnClick = { },
-            isLive = false,
-            confidenceScore = 0.0
-        )
-    }
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ResultsViewErrorPreview() {
-    MaterialTheme {
-        ResultsView(
-            sessionId = UUID.randomUUID().toString(),
-            isLive = false,
-            error = FaceLivenessDetectionException.SessionTimedOutException(),
-            tryAgainButtonOnClick = { }
-        )
-    }
 }

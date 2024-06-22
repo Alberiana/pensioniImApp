@@ -3,6 +3,7 @@ package com.example.pensioniim
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -26,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -52,29 +52,29 @@ class MainActivity : ComponentActivity() {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 navigateToFaceLiveness = isGranted
             }
+
         setContent {
             val navController = rememberNavController()
+            val viewModel: MainViewModel = viewModel()
 
             NavHost(navController, startDestination = "main") {
                 composable("main") {
-                    MainActivityContent(navController)
+                    MainActivityContent(navController, viewModel)
                 }
                 composable("faceLivenessScreen") {
-                    FaceLivenessScreenContent(navController)
+                    FaceLivenessScreenContent(navController, viewModel)
                 }
-                composable("ResultScreen") { // Make sure this route is exactly "ResultScreen"
-                    val viewModel: MainViewModel = viewModel()
+                composable("ResultScreen") {
+                    Log.d("MainActivity", "Navigating to ResultScreen with ViewModel: $viewModel")
                     ResultScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
                 }
             }
-
-
         }
     }
 
 
     @Composable
-    fun MainActivityContent(navController: NavHostController) {
+    fun MainActivityContent(navController: NavHostController, viewModel: MainViewModel) {
         val localNavController = rememberNavController()
         if (navigateToFaceLiveness) {
             LaunchedEffect(Unit) {
@@ -110,9 +110,9 @@ class MainActivity : ComponentActivity() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+
     @Composable
-    fun FaceLivenessScreenContent(navController: NavHostController) {
-        val viewModel: MainViewModel = viewModel()
+    fun FaceLivenessScreenContent(navController: NavHostController, viewModel: MainViewModel) {
         FaceLivenessScreen(viewModel = viewModel, onChallengeComplete = {
             navController.navigate("ResultScreen") {
                 popUpTo("faceLivenessScreen") {
@@ -127,18 +127,17 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ResultScreenContent(navController: NavHostController) {
-        // Content and logic of the ResultScreen
+    fun ResultScreenContent(navController: NavHostController, viewModel: MainViewModel) {
         Scaffold(
             topBar = { TopAppBar(title = { Text("Result") }) },
             content = { paddingValues ->
-                ResultScreenBody(navController, paddingValues)
+                ResultScreenBody(navController, paddingValues, viewModel)
             }
         )
     }
 
     @Composable
-    fun ResultScreenBody(navController: NavHostController, paddingValues: PaddingValues) {
+    fun ResultScreenBody(navController: NavHostController, paddingValues: PaddingValues, viewModel: MainViewModel) {
         Column(
             modifier = Modifier.padding(paddingValues).fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -155,8 +154,10 @@ class MainActivity : ComponentActivity() {
     }
     @Preview
     @Composable
-    fun previewMainActivity(){
-        MainActivityContent(navController = NavHostController(LocalContext.current))
+    fun previewMainActivity() {
+        val navController = rememberNavController()
+        val viewModel: MainViewModel = viewModel()
+        MainActivityContent(navController = navController, viewModel = viewModel)
     }
 }
 
