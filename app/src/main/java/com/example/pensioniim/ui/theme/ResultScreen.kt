@@ -90,6 +90,20 @@ private fun ResultsView(resultData: ResultData) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            if (score > 90) {
+                Text(
+                    text = "Jeni verifikuar me sukses!",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            } else {
+                Text(
+                    text = "Ju nuk jeni verifikuar me sukses. Ju lutemi provoni perseri!",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         } ?: run {
             Text("Confidence score not available")
         }

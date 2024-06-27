@@ -22,11 +22,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -85,8 +82,9 @@ class MainActivity : ComponentActivity() {
                 composable("IDCardScreen") {
                     IDCardScreen(navController)
                 }
-                composable("ContinueVerificationScreen") {
-                    ContinueVerificationScreen(navController)
+                composable("ContinueVerificationScreen/{id}") { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id") ?: ""
+                    ContinueVerificationScreen(navController, viewModel, id)
                 }
             }
         }
@@ -161,17 +159,6 @@ class MainActivity : ComponentActivity() {
         })
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ResultScreenContent(navController: NavHostController, viewModel: MainViewModel) {
-        Scaffold(
-            topBar = { TopAppBar(title = { Text("Result") }) },
-            content = { paddingValues ->
-                ResultScreenBody(navController, paddingValues, viewModel)
-            }
-        )
-    }
-
     @Composable
     fun ResultScreenBody(navController: NavHostController, paddingValues: PaddingValues, viewModel: MainViewModel) {
         Column(
@@ -189,12 +176,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
     @Composable
     fun IDCardScreen(navController: NavHostController) {
-        var text by remember {
-            mutableStateOf("")
-        }
+        var text by remember { mutableStateOf("") }
         var isError by remember { mutableStateOf(false) }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -235,50 +222,13 @@ class MainActivity : ComponentActivity() {
             Spacer(Modifier.weight(1f))
             Button(
                 onClick = {
-                    navController.navigate("ContinueVerificationScreen")
-
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(16.dp)
-                    .width(300.dp)
-                    .height(60.dp)
-            ){
-                Text("Vazhdo")
-            }
-        }
-    }
-    @Composable
-    fun ContinueVerificationScreen(navController: NavHostController) {
-        var text by remember {
-            mutableStateOf("")
-        }
-        var isError by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(Modifier.size(300.dp))
-            Text(
-                text = "Mirëseerdhe Jana!",
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(20.dp),
-                style = TextStyle(
-                    fontSize = 38.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            )
-            Spacer(Modifier.weight(1f))
-            Button(
-                onClick = {
-                    if (checkCameraPermission()) {
-                        navController.navigate("faceLivenessScreen")
+                    if (text.length == 10) {
+                        Log.d("IDCardScreen", "Navigating to ContinueVerificationScreen with ID: $text")
+                        navController.navigate("ContinueVerificationScreen/$text")
                     } else {
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        Log.d("IDCardScreen", "ID length is not 10, current length: ${text.length}")
+                        isError = true
                     }
-
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -290,6 +240,59 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
+
+    @Composable
+    fun ContinueVerificationScreen(navController: NavHostController, viewModel: MainViewModel, id: String) {
+        var isError by remember { mutableStateOf(false) }
+
+        val identificationDetails by viewModel::identificationDetails
+
+        LaunchedEffect(id) {
+            viewModel.fetchIdentificationDetails(id)
+        }
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.size(300.dp))
+            Text(
+                text = if (identificationDetails != null) "Mirëseerdhe ${identificationDetails!!.name} ${identificationDetails!!.surname}!" else "Duke kërkuar informacion...",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(20.dp),
+                style = TextStyle(
+                    fontSize = if (identificationDetails != null) 38.sp else 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            )
+            Spacer(Modifier.weight(1f))
+            Button(
+                onClick = {
+                    if (identificationDetails != null) {
+                        if (checkCameraPermission()) {
+                            navController.navigate("faceLivenessScreen")
+                        } else {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(16.dp)
+                    .width(300.dp)
+                    .height(60.dp)
+            ) {
+                Text("Verifikohu me fytyrë")
+            }
+        }
+    }
+
+
+
 
     @Preview
     @Composable

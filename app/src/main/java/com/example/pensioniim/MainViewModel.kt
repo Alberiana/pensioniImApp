@@ -4,17 +4,20 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
 import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.liveness.model.FaceLivenessDetectionException
+import com.example.pensioniim.backend.IdentificationDetails
 import com.example.pensioniim.backend.LivenessSampleBackend
+import com.example.pensioniim.backend.LivenessSampleBackend.getIdentificationDetails
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +28,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class MainViewModel : ViewModel() {
-    private val supervisorJob = SupervisorJob()
-    private val jobMap = mutableMapOf<String, Job>()
     private val _authState = MutableStateFlow<AuthState>(AuthState.Fetching)
     val authState = _authState.asStateFlow()
 
@@ -41,6 +42,9 @@ class MainViewModel : ViewModel() {
 
     private val _resultData = MutableStateFlow<ResultData?>(null)
     val resultData = _resultData.asStateFlow()
+
+    var identificationDetails by mutableStateOf<IdentificationDetails?>(null)
+
     init {
         viewModelScope.launch {
             fetchAuthState()
@@ -166,7 +170,15 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-
+    fun fetchIdentificationDetails(identificationNumber: String) {
+        viewModelScope.launch {
+            try {
+                identificationDetails = getIdentificationDetails(identificationNumber)
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error fetching identification details: ${e.message}", e)
+            }
+        }
+    }
     fun reportErrorResult(exception: FaceLivenessDetectionException) {
         sessionId.value?.let {
             _resultData.value = ResultData(it, error = exception)

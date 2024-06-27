@@ -3,9 +3,7 @@ package com.example.pensioniim.backend
 
 import android.util.Log
 import aws.smithy.kotlin.runtime.io.IOException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -15,8 +13,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 object LivenessSampleBackend {
-    private val json = Json { ignoreUnknownKeys = true }
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     suspend fun createSession(): String {
         val client = OkHttpClient()
@@ -49,8 +45,6 @@ object LivenessSampleBackend {
             throw e
         }
     }
-
-
 
     suspend fun getLivenessSessionResults(sessionId: String): LivenessSessionResult {
         Log.i("GET RESULTTT", "Fetching result for session ID: $sessionId")
@@ -99,8 +93,50 @@ object LivenessSampleBackend {
         }
     }
 
+    suspend fun getIdentificationDetails(identificationNumber: String): IdentificationDetails {
+        val client = OkHttpClient()
+        val url = "https://3kgj5ykf62.execute-api.us-east-1.amazonaws.com/default/storedImages/$identificationNumber"
+        Log.i("GET IDENTIFICATION DETAILS", "Request URL: $url")
 
+        val request = Request.Builder()
+            .url(url)
+            .build()
 
+        return withContext(Dispatchers.IO) {
+            try {
+                client.newCall(request).execute().use { response ->
+                    val responseData = response.body?.string()
+                    Log.i("GET IDENTIFICATION DETAILS", "Response code: ${response.code}")
+                    Log.i("GET IDENTIFICATION DETAILS", "Response data: $responseData")
+
+                    if (!response.isSuccessful) {
+                        throw IOException("Unexpected code $response")
+                    }
+
+                    if (responseData.isNullOrEmpty()) {
+                        throw IOException("Empty response body")
+                    }
+
+                    try {
+                        val json = Json { ignoreUnknownKeys = true }
+                        val result: IdentificationDetails = json.decodeFromString(responseData)
+                        Log.i("GET IDENTIFICATION DETAILS", "Decoded result: $result")
+                        return@withContext result
+                    } catch (e: Exception) {
+                        Log.e("JSON Decode Error", "Error decoding JSON response: ${e.message}", e)
+                        throw e
+                    }
+                }
+            } catch (e: IOException) {
+                Log.e("IOException", "Error during HTTP call: ${e.message}", e)
+                throw e
+            } catch (e: Exception) {
+                Log.e("Exception", "General error: ${e.message}", e)
+                e.printStackTrace()
+                throw e
+            }
+        }
+    }
 }
 @Serializable
 data class LivenessSessionResult(
@@ -108,4 +144,10 @@ data class LivenessSessionResult(
     val confidenceScore: Double?,
     val referenceImageUrl: String?,
     val auditImages: List<String>?
+)
+@Serializable
+data class IdentificationDetails(
+    val name: String,
+    val surname: String,
+    val image_url: String
 )
