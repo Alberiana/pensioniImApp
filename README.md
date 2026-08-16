@@ -117,26 +117,23 @@ The application then reports whether the verification was successful.
 ## 📸 Screenshots
 
 ### Registration & Verification
-
 <p align="center">
-  <img src="screenshots/registration.png" width="220">
-  <img src="screenshots/phone-verification.png" width="220">
-  <img src="screenshots/identity-verification.png" width="220">
+   <img width="190" height="342" alt="image" src="https://github.com/user-attachments/assets/adc139f8-b102-4d84-be43-a59fb9e27d8b" />
+   <img width="198" height="344" alt="image" src="https://github.com/user-attachments/assets/d866245b-e62b-4df6-bce5-5bf53c47b506" />
+   <img width="202" height="351" alt="image" src="https://github.com/user-attachments/assets/592d9baa-e7c6-4121-b634-8beb2aeaab38" />
+  <img width="684" height="302" alt="image" src="https://github.com/user-attachments/assets/9fba2818-830b-4c59-aa30-f69791baf62c" />
 </p>
-
 ### Liveness Verification
 
 <p align="center">
-  <img src="screenshots/face-position.png" width="220">
-  <img src="screenshots/move-closer.png" width="220">
-  <img src="screenshots/hold-still.png" width="220">
+  <img width="330" height="563" alt="image" src="https://github.com/user-attachments/assets/ed1e1798-8ecc-434d-97ae-8860feb27c1b" />
 </p>
 
 ### Verification Result
 
 <p align="center">
-  <img src="screenshots/success.png" width="220">
-  <img src="screenshots/failure.png" width="220">
+  <img width="341" height="565" alt="image" src="https://github.com/user-attachments/assets/2619923a-989d-45af-8a67-7a3268b6de74" />
+  <img width="341" height="565" alt="image" src="https://github.com/user-attachments/assets/d3570499-ea61-4dae-bb7e-cfd28a312462" />
 </p>
 
 ## 🧩 Key Technical Highlights
